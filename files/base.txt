@@ -1,0 +1,244 @@
+# ==============================================================
+# PANDAS — ОСНОВНЫЕ ОПЕРАЦИИ С ДАННЫМИ
+# ==============================================================
+
+import pandas as pd
+import numpy as np
+
+# ----------------------------
+# 1. Загрузка и первичный анализ
+# ----------------------------
+# read_csv — основной способ загрузки датасета
+df = pd.read_csv('data.csv')
+
+df.head()       # первые строки набора
+df.info()       # структура данных и типы столбцов
+df.describe()   # статистика по числовым признакам
+
+# ----------------------------
+# 2. Предобработка данных
+# ----------------------------
+
+# создание нового признака
+df['new_col'] = df['col1'] + df['col2']
+
+# заполнение пропусков средним значением
+df['age'].fillna(df['age'].mean(), inplace=True)
+
+# заполнение всех NaN нулём
+df.fillna(0, inplace=True)
+
+# преобразование типа
+df['category'] = df['category'].astype('category')
+
+# удаление выбросов по перцентилю
+df = df[df['value'] < df['value'].quantile(0.95)]
+
+# ----------------------------
+# 3. Фильтрация данных
+# ----------------------------
+df[df['age'] > 18]
+df[(df['age'] > 18) & (df['gender'] == 'M')]
+
+# ----------------------------
+# 4. Группировка и агрегация
+# ----------------------------
+df.groupby('category')['value'].mean()
+df.groupby('city').agg({'income': 'mean', 'age': 'median'})
+
+# ----------------------------
+# 5. Слияние данных
+# ----------------------------
+df_merged = pd.merge(df1, df2, on='id', how='inner')
+df_concat = pd.concat([df1, df2], axis=0)
+df_joined = df1.join(df2.set_index('id'), on='id')
+
+
+# ==============================================================
+# SCIKIT-LEARN — КЛАССИЧЕСКОЕ МАШИННОЕ ОБУЧЕНИЕ
+# ==============================================================
+
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.cluster import KMeans
+from sklearn.metrics import accuracy_score, mean_squared_error, confusion_matrix
+
+# ----------------------------
+# 1. Разделение данных
+# ----------------------------
+X = df[['feature1','feature2']].values
+y = df['target'].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# ----------------------------
+# 2. Масштабирование признаков
+# ----------------------------
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# ----------------------------
+# 3. Обучение классификатора Random Forest
+# ----------------------------
+clf = RandomForestClassifier(n_estimators=100)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+
+acc = accuracy_score(y_test, y_pred)
+print("Accuracy:", acc)
+
+# матрица ошибок
+print("Confusion matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+# ----------------------------
+# 4. Регрессия — линейная модель
+# ----------------------------
+reg = LinearRegression()
+reg.fit(X_train, y_train)
+y_pred_reg = reg.predict(X_test)
+
+mse = mean_squared_error(y_test, y_pred_reg)
+print("MSE:", mse)
+
+# ----------------------------
+# 5. Кластеризация KMeans
+# ----------------------------
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(X)
+labels = kmeans.labels_
+print("Cluster labels:", labels)
+
+# ----------------------------
+# 6. Кодирование категориальных признаков
+# ----------------------------
+le = LabelEncoder()
+df['encoded_class'] = le.fit_transform(df['class'])
+
+
+# ==============================================================
+# ТИПОВАЯ МАТЕМАТИКА ДЛЯ ИИ
+# ==============================================================
+
+# ----------------------------
+# 1. Линейная алгебра
+# ----------------------------
+A = np.array([[1,2],[3,4]])
+A_inv = np.linalg.inv(A)   # обратная матрица
+A_dot = np.dot(A, [1,0])   # произведение
+A_T = np.transpose(A)      # транспонирование
+eig_vals, eig_vecs = np.linalg.eig(A)  # собственные значения
+
+# ----------------------------
+# 2. Статистика
+# ----------------------------
+arr = [1,2,3,4,5]
+np.mean(arr)
+np.median(arr)
+np.var(arr)
+np.std(arr)
+np.corrcoef([1,2,3], [4,5,6])
+np.cov([1,2,3], [4,5,6])
+
+# ----------------------------
+# 3. Вероятность
+# ----------------------------
+from math import comb, factorial
+comb(5,2)       # сочетания
+factorial(5)
+
+# ----------------------------
+# 4. Функции активации
+# ----------------------------
+import math
+sigmoid = lambda x: 1/(1+math.exp(-x))
+relu = lambda x: max(0, x)
+tanh = lambda x: math.tanh(x)
+
+
+# ==============================================================
+# PYTHON HELP — ИНСТРУМЕНТЫ ИЗУЧЕНИЯ
+# ==============================================================
+
+help(pd.DataFrame)   # документация
+dir(df)              # список атрибутов
+df.__doc__           # описание объекта
+
+
+# ==============================================================
+# ПРАКТИЧЕСКИЕ ЗАДАЧИ С КОММЕНТАРИЯМИ
+# ==============================================================
+
+# --------------------------------------------------------------
+# ЗАДАЧА 1: КЛАССИФИКАЦИЯ IRIS
+# --------------------------------------------------------------
+
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+
+iris = load_iris()
+
+# target==0 — проверяем, является ли цветок Setosa
+X_train, X_test, y_train, y_test = train_test_split(
+    iris.data, iris.target == 0, test_size=0.3
+)
+
+clf = DecisionTreeClassifier()
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+
+print("Accuracy (Iris):", accuracy_score(y_test, y_pred))
+
+
+# --------------------------------------------------------------
+# ЗАДАЧА 2: РЕГРЕССИЯ — ПРОГНОЗ ЦЕНЫ ДОМА
+# --------------------------------------------------------------
+
+# предполагается, что в df есть колонки size, rooms, price
+X = df[['size','rooms']].values
+y = df['price'].values
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+print("MSE (Housing):", mean_squared_error(y_test, y_pred))
+
+
+# --------------------------------------------------------------
+# ЗАДАЧА 3: КЛАСТЕРИЗАЦИЯ ТОЧЕК
+# --------------------------------------------------------------
+
+X = np.array([[1,2],[1,4],[5,6],[6,5],[5,5]])
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(X)
+
+print("KMeans labels:", kmeans.labels_)
+
+
+# --------------------------------------------------------------
+# ЗАДАЧА 4: ОБРАБОТКА ДАННЫХ
+# --------------------------------------------------------------
+
+# Заполнение пропусков средним
+df['age'].fillna(df['age'].mean(), inplace=True)
+
+# Создание нового признака BMI
+df['bmi'] = df['weight'] / ((df['height'] / 100) ** 2)
+
+
+# --------------------------------------------------------------
+# ЗАДАЧА 5: МИНИМИЗАЦИЯ ФУНКЦИИ
+# --------------------------------------------------------------
+
+from scipy.optimize import minimize
+
+# Минимизируем (x - 3)^2, начальное значение x0 = 0
+res = minimize(lambda x: (x - 3)**2, x0=0)
+
+print("Минимум функции:", res.x)

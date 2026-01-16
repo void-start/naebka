@@ -6,7 +6,7 @@ FILES_DIR = "files"
 
 @app.route("/download", methods=["GET"])
 def download():
-    filename = "test.zip"  # ← ЖЁСТКО ЗАДАНО
+    filename = "files.zip"  # ← ЖЁСТКО ЗАДАНО
     return send_from_directory(
         directory=FILES_DIR,
         path=filename,

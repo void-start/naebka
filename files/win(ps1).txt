@@ -1,0 +1,41 @@
+$ApiKey  = "7xMTOT8C4GNXwTEUB2TQT8jJQYaxKMsg"
+$RawJson = "raw_response.json"
+$OutFile = "result.txt"
+
+$Headers = @{
+    "Authorization" = "Bearer $ApiKey"
+    "Content-Type"  = "application/json"
+}
+
+$Body = @'
+{
+  "model": "mistral-large-latest",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a technical assistant. Rules: Answer ONLY with the final result. Do NOT include explanations, metadata, or JSON. If code is requested, output ONLY code. Preserve indentation and formatting. Do not use markdown fences unless explicitly requested."
+    },
+    {
+      "role": "user",
+      "content": "write a simple web game in one file"
+    }
+  ]
+}
+'@
+
+Invoke-WebRequest `
+    -Uri "https://api.mistral.ai/v1/chat/completions" `
+    -Method Post `
+    -Headers $Headers `
+    -Body $Body `
+    -OutFile $RawJson
+
+# ==== БАЗОВАЯ ОБРАБОТКА ====
+$Text = Get-Content $RawJson -Raw
+
+if ($Text -match '"content":"(.*?)"}') {
+    $Result = $Matches[1]
+    $Result = $Result -replace '\\n', "`n"
+    $Result = $Result -replace '\\"', '"'
+    Set-Content -Path $OutFile -Value $Result
+}

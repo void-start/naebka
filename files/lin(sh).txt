@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+API_KEY="7xMTOT8C4GNXwTEUB2TQT8jJQYaxKMsg"
+RAW_JSON="raw_response.json"
+OUT_FILE="result.txt"
+
+curl https://api.mistral.ai/v1/chat/completions \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "mistral-large-latest",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a technical assistant. Rules: Answer ONLY with the final result. Do NOT include explanations, metadata, or JSON. If code is requested, output ONLY code. Preserve indentation and formatting. Do not use markdown fences unless explicitly requested."
+      },
+      {
+        "role": "user",
+        "content": "Write a Python function that adds two numbers"
+      }
+    ]
+  }' \
+  --silent > "$RAW_JSON"
+
+# ==== БАЗОВАЯ ОБРАБОТКА ====
+# Извлекаем content и восстанавливаем переносы строк
+sed -n 's/.*"content":"//p' "$RAW_JSON" \
+  | sed 's/"}.*//' \
+  | sed 's/\\n/\n/g' \
+  | sed 's/\\"/"/g' \
+  > "$OUT_FILE"
